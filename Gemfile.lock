@@ -1,0 +1,16 @@
+PATH
+  remote: .
+  specs:
+    berkshelf-shims (0.2.3)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    rake (10.0.3)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  berkshelf-shims!
+  rake
