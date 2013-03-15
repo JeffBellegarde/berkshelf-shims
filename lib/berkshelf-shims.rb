@@ -1,5 +1,11 @@
 module BerkshelfShims
 
+  class UnknownCookbookReferenceError < StandardError
+    def initialize(cookbook_name, options)
+      super("Unknown cookbook reference #{cookbook_name} #{options}")
+    end
+  end
+
   BERKSHELF_PATH_ENV = 'BERKSHELF_PATH'
   def self.berkshelf_path
     File.absolute_path(ENV[BERKSHELF_PATH_ENV] || "#{ENV['HOME']}/.berkshelf/")
@@ -25,7 +31,7 @@ module BerkshelfShims
       self
     end
 
-    def cookbook(name, options)
+    def cookbook(name, options = {})
       cookbooks[name] = options
     end
 
@@ -40,7 +46,7 @@ module BerkshelfShims
         if target
           FileUtils.ln_s(target, "#{cookbook_dir}/#{name}", :force => true)
         else
-          puts "unknown cookbook reference #{name} #{options}"
+          raise UnknownCookbookReferenceError.new(name, options)
         end
       end
     end

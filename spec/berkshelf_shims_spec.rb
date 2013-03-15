@@ -28,47 +28,62 @@ describe BerkshelfShims do
       FileUtils.rm_rf(test_dir)
       FileUtils.mkdir(test_dir)
       File.open(lock_file, 'w') do |f|
-        f.puts "cookbook 'relative', :path => '#{relative_target_dir}'"
-        f.puts "cookbook 'versioned', :locked_version => '0.0.1'"
+        cookbook_entries.each do |line|
+          f.puts line
+        end
+      end
+    end
+    context 'with a normal input' do
+      let(:cookbook_entries) {[
+          "cookbook 'relative', :path => '#{relative_target_dir}'",
+          "cookbook 'versioned', :locked_version => '0.0.1'"
+        ]}
+
+      context 'with the default berkshelf path' do
+        before do
+          BerkshelfShims::create_shims('tmp')
+        end
+        it 'creates the links' do
+          Dir.exists?(cookbooks_dir).should == true
+          Dir["#{cookbooks_dir}/*"].should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned"]
+          File.readlink("#{cookbooks_dir}/relative").should == '/Some/Directory'
+          File.readlink("#{cookbooks_dir}/versioned").should == "#{BerkshelfShims.berkshelf_path}/cookbooks/versioned-0.0.1"
+        end
+      end
+
+      context 'with an explicit berkshelf path' do
+        before do
+          BerkshelfShims::create_shims('tmp', 'berkshelf')
+        end
+        it 'creates the links' do
+          Dir.exists?(cookbooks_dir).should == true
+          Dir["#{cookbooks_dir}/*"].should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned"]
+          File.readlink("#{cookbooks_dir}/relative").should == '/Some/Directory'
+          File.readlink("#{cookbooks_dir}/versioned").should == "berkshelf/cookbooks/versioned-0.0.1"
+        end
+      end
+
+      context 'with an environent variable' do
+        before do
+          ENV[BerkshelfShims::BERKSHELF_PATH_ENV] = '/berkshelf_env'
+          BerkshelfShims::create_shims('tmp')
+        end
+        it 'creates the links' do
+          Dir.exists?(cookbooks_dir).should == true
+          Dir["#{cookbooks_dir}/*"].should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned"]
+          File.readlink("#{cookbooks_dir}/relative").should == '/Some/Directory'
+          File.readlink("#{cookbooks_dir}/versioned").should == "/berkshelf_env/cookbooks/versioned-0.0.1"
+        end
       end
     end
 
-    context 'with the default berkshelf path' do
-      before do
-        BerkshelfShims::create_shims('tmp')
-      end
-      it 'creates the links' do
-        Dir.exists?(cookbooks_dir).should == true
-        Dir["#{cookbooks_dir}/*"].should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned"]
-        File.readlink("#{cookbooks_dir}/relative").should == '/Some/Directory'
-        File.readlink("#{cookbooks_dir}/versioned").should == "#{BerkshelfShims.berkshelf_path}/cookbooks/versioned-0.0.1"
+    context 'with an unknown cookbook reference' do
+      let(:cookbook_entries) {[
+          "cookbook 'relative'"
+        ]}
+      it 'throws an error' do
+        expect {BerkshelfShims::create_shims('tmp')}.to raise_error BerkshelfShims::UnknownCookbookReferenceError
       end
     end
-
-    context 'with an explicit berkshelf path' do
-      before do
-        BerkshelfShims::create_shims('tmp', 'berkshelf')
-      end
-      it 'creates the links' do
-        Dir.exists?(cookbooks_dir).should == true
-        Dir["#{cookbooks_dir}/*"].should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned"]
-        File.readlink("#{cookbooks_dir}/relative").should == '/Some/Directory'
-        File.readlink("#{cookbooks_dir}/versioned").should == "berkshelf/cookbooks/versioned-0.0.1"
-      end
-    end
-
-    context 'with an environent variable' do
-      before do
-        ENV[BerkshelfShims::BERKSHELF_PATH_ENV] = '/berkshelf_env'
-        BerkshelfShims::create_shims('tmp')
-      end
-      it 'creates the links' do
-        Dir.exists?(cookbooks_dir).should == true
-        Dir["#{cookbooks_dir}/*"].should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned"]
-        File.readlink("#{cookbooks_dir}/relative").should == '/Some/Directory'
-        File.readlink("#{cookbooks_dir}/versioned").should == "/berkshelf_env/cookbooks/versioned-0.0.1"
-      end
-    end
-
   end
 end
