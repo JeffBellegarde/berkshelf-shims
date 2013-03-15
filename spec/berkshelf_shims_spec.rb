@@ -45,7 +45,7 @@ describe BerkshelfShims do
         end
         it 'creates the links' do
           Dir.exists?(cookbooks_dir).should == true
-          Dir["#{cookbooks_dir}/*"].should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned"]
+          Dir["#{cookbooks_dir}/*"].sort.should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned"]
           File.readlink("#{cookbooks_dir}/relative").should == '/Some/Directory'
           File.readlink("#{cookbooks_dir}/versioned").should == "#{BerkshelfShims.berkshelf_path}/cookbooks/versioned-0.0.1"
         end
@@ -57,7 +57,7 @@ describe BerkshelfShims do
         end
         it 'creates the links' do
           Dir.exists?(cookbooks_dir).should == true
-          Dir["#{cookbooks_dir}/*"].should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned"]
+          Dir["#{cookbooks_dir}/*"].sort.should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned"]
           File.readlink("#{cookbooks_dir}/relative").should == '/Some/Directory'
           File.readlink("#{cookbooks_dir}/versioned").should == "berkshelf/cookbooks/versioned-0.0.1"
         end
@@ -70,7 +70,7 @@ describe BerkshelfShims do
         end
         it 'creates the links' do
           Dir.exists?(cookbooks_dir).should == true
-          Dir["#{cookbooks_dir}/*"].should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned"]
+          Dir["#{cookbooks_dir}/*"].sort.should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned"]
           File.readlink("#{cookbooks_dir}/relative").should == '/Some/Directory'
           File.readlink("#{cookbooks_dir}/versioned").should == "/berkshelf_env/cookbooks/versioned-0.0.1"
         end
