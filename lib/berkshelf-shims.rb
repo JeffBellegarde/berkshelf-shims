@@ -1,7 +1,8 @@
 module BerkshelfShims
 
+  BERKSHELF_PATH_ENV = 'BERKSHELF_PATH'
   def self.berkshelf_path
-    File.absolute_path(ENV['BERKSHELF_PATH'] || "#{ENV['HOME']}/.berkshelf/")
+    File.absolute_path(ENV[BERKSHELF_PATH_ENV] || "#{ENV['HOME']}/.berkshelf/")
   end
 
   class BerksLockFile
@@ -46,7 +47,8 @@ module BerkshelfShims
   end
 
   def self.create_shims(root, path=nil)
-    BerksLockFile::from_file("#{root}/Berksfile.lock").create_links("#{root}/cookbooks", path ? path : berkshelf_path)
+    path ||= berkshelf_path
+    BerksLockFile::from_file("#{root}/Berksfile.lock").create_links("#{root}/cookbooks", path)
   end
 
 end

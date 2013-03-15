@@ -23,6 +23,7 @@ describe BerkshelfShims do
     let(:lock_file) {"#{test_dir}/Berksfile.lock"}
     let(:cookbooks_dir) {"#{test_dir}/cookbooks"}
     let(:relative_target_dir) {'/Some/Directory'}
+
     before do
       FileUtils.rm_rf(test_dir)
       FileUtils.mkdir(test_dir)
@@ -30,13 +31,44 @@ describe BerkshelfShims do
         f.puts "cookbook 'relative', :path => '#{relative_target_dir}'"
         f.puts "cookbook 'versioned', :locked_version => '0.0.1'"
       end
-      BerkshelfShims::create_shims('tmp')
     end
-    it 'creates the links' do
-      Dir.exists?(cookbooks_dir).should == true
-      Dir["#{cookbooks_dir}/*"].should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned"]
-      File.readlink("#{cookbooks_dir}/relative").should == '/Some/Directory'
-      File.readlink("#{cookbooks_dir}/versioned").should == "#{BerkshelfShims.berkshelf_path}/cookbooks/versioned-0.0.1"
+
+    context 'with the default berkshelf path' do
+      before do
+        BerkshelfShims::create_shims('tmp')
+      end
+      it 'creates the links' do
+        Dir.exists?(cookbooks_dir).should == true
+        Dir["#{cookbooks_dir}/*"].should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned"]
+        File.readlink("#{cookbooks_dir}/relative").should == '/Some/Directory'
+        File.readlink("#{cookbooks_dir}/versioned").should == "#{BerkshelfShims.berkshelf_path}/cookbooks/versioned-0.0.1"
+      end
     end
+
+    context 'with an explicit berkshelf path' do
+      before do
+        BerkshelfShims::create_shims('tmp', 'berkshelf')
+      end
+      it 'creates the links' do
+        Dir.exists?(cookbooks_dir).should == true
+        Dir["#{cookbooks_dir}/*"].should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned"]
+        File.readlink("#{cookbooks_dir}/relative").should == '/Some/Directory'
+        File.readlink("#{cookbooks_dir}/versioned").should == "berkshelf/cookbooks/versioned-0.0.1"
+      end
+    end
+
+    context 'with an environent variable' do
+      before do
+        ENV[BerkshelfShims::BERKSHELF_PATH_ENV] = '/berkshelf_env'
+        BerkshelfShims::create_shims('tmp')
+      end
+      it 'creates the links' do
+        Dir.exists?(cookbooks_dir).should == true
+        Dir["#{cookbooks_dir}/*"].should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned"]
+        File.readlink("#{cookbooks_dir}/relative").should == '/Some/Directory'
+        File.readlink("#{cookbooks_dir}/versioned").should == "/berkshelf_env/cookbooks/versioned-0.0.1"
+      end
+    end
+
   end
 end
