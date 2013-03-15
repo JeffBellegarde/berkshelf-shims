@@ -1,5 +1,5 @@
 module WP
   module Cookbook
-    VERSION = "0.2.3"
+    VERSION = "0.1.0"
   end
 end

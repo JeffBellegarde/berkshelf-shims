@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    berkshelf-shims (0.2.3)
+    berkshelf-shims (0.1.0)
 
 GEM
   remote: https://rubygems.org/
