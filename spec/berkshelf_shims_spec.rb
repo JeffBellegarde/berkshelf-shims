@@ -36,7 +36,8 @@ describe BerkshelfShims do
     context 'with a normal input' do
       let(:cookbook_entries) {[
           "cookbook 'relative', :path => '#{relative_target_dir}'",
-          "cookbook 'versioned', :locked_version => '0.0.1'"
+          "cookbook 'versioned', :locked_version => '0.0.1'",
+          "cookbook 'somegitrepo', :git => 'http://github.com/someuser/somegitrepo.git', :ref => '6ffb9cf5ddee65b8c208dec5c7b1ca9a4259b86a'"
         ]}
 
       context 'with the default berkshelf path' do
@@ -45,9 +46,10 @@ describe BerkshelfShims do
         end
         it 'creates the links' do
           Dir.exists?(cookbooks_dir).should == true
-          Dir["#{cookbooks_dir}/*"].sort.should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned"]
+          Dir["#{cookbooks_dir}/*"].sort.should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned", "#{cookbooks_dir}/somegitrepo"]
           File.readlink("#{cookbooks_dir}/relative").should == '/Some/Directory'
           File.readlink("#{cookbooks_dir}/versioned").should == "#{BerkshelfShims.berkshelf_path}/cookbooks/versioned-0.0.1"
+          File.readlink("#{cookbooks_dir}/somegitrepo").should == "#{BerkshelfShims.berkshelf_path}/cookbooks/somegitrepo-6ffb9cf5ddee65b8c208dec5c7b1ca9a4259b86a"
         end
       end
 
@@ -57,9 +59,10 @@ describe BerkshelfShims do
         end
         it 'creates the links' do
           Dir.exists?(cookbooks_dir).should == true
-          Dir["#{cookbooks_dir}/*"].sort.should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned"]
+          Dir["#{cookbooks_dir}/*"].sort.should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned", "#{cookbooks_dir}/somegitrepo"]
           File.readlink("#{cookbooks_dir}/relative").should == '/Some/Directory'
           File.readlink("#{cookbooks_dir}/versioned").should == "berkshelf/cookbooks/versioned-0.0.1"
+          File.readlink("#{cookbooks_dir}/somegitrepo").should == "#{BerkshelfShims.berkshelf_path}/cookbooks/somegitrepo-6ffb9cf5ddee65b8c208dec5c7b1ca9a4259b86a"
         end
       end
 
@@ -70,9 +73,10 @@ describe BerkshelfShims do
         end
         it 'creates the links' do
           Dir.exists?(cookbooks_dir).should == true
-          Dir["#{cookbooks_dir}/*"].sort.should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned"]
+          Dir["#{cookbooks_dir}/*"].sort.should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/versioned", "#{cookbooks_dir}/somegitrepo"]
           File.readlink("#{cookbooks_dir}/relative").should == '/Some/Directory'
           File.readlink("#{cookbooks_dir}/versioned").should == "/berkshelf_env/cookbooks/versioned-0.0.1"
+          File.readlink("#{cookbooks_dir}/somegitrepo").should == "#{BerkshelfShims.berkshelf_path}/cookbooks/somegitrepo-6ffb9cf5ddee65b8c208dec5c7b1ca9a4259b86a"
         end
       end
     end
