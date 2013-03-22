@@ -42,6 +42,8 @@ module BerkshelfShims
           target = options[:path]
         elsif options[:locked_version]
           target = "#{berkshelf_path}/cookbooks/#{name}-#{options[:locked_version]}"
+        elsif options[:git] && options[:ref]
+          target = "#{berkshelf_path}/cookbooks/#{name}-#{options[:ref]}"
         end
         if target
           FileUtils.ln_s(target, "#{cookbook_dir}/#{name}", :force => true)
