@@ -62,7 +62,7 @@ describe BerkshelfShims do
           Dir["#{cookbooks_dir}/*"].sort.should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/somegitrepo", "#{cookbooks_dir}/versioned"]
           File.readlink("#{cookbooks_dir}/relative").should == '/Some/Directory'
           File.readlink("#{cookbooks_dir}/versioned").should == "berkshelf/cookbooks/versioned-0.0.1"
-          File.readlink("#{cookbooks_dir}/somegitrepo").should == "#{BerkshelfShims.berkshelf_path}/cookbooks/somegitrepo-6ffb9cf5ddee65b8c208dec5c7b1ca9a4259b86a"
+          File.readlink("#{cookbooks_dir}/somegitrepo").should == "berkshelf/cookbooks/somegitrepo-6ffb9cf5ddee65b8c208dec5c7b1ca9a4259b86a"
         end
       end
 
@@ -76,7 +76,7 @@ describe BerkshelfShims do
           Dir["#{cookbooks_dir}/*"].sort.should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/somegitrepo", "#{cookbooks_dir}/versioned"]
           File.readlink("#{cookbooks_dir}/relative").should == '/Some/Directory'
           File.readlink("#{cookbooks_dir}/versioned").should == "/berkshelf_env/cookbooks/versioned-0.0.1"
-          File.readlink("#{cookbooks_dir}/somegitrepo").should == "#{BerkshelfShims.berkshelf_path}/cookbooks/somegitrepo-6ffb9cf5ddee65b8c208dec5c7b1ca9a4259b86a"
+          File.readlink("#{cookbooks_dir}/somegitrepo").should == "/berkshelf_env/cookbooks/somegitrepo-6ffb9cf5ddee65b8c208dec5c7b1ca9a4259b86a"
         end
       end
     end
