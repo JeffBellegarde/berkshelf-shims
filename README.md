@@ -30,10 +30,9 @@ Put the following into spec/spec_helper.rb.
 ```ruby
 require 'berkshelf-shims'
 
-root_dir = File.join(File.dirname(__FILE__), '..')
 RSpec.configure do |config|
   config.before(:suite) do
-    BerkshelfShims::create_shims(root_dir)
+    BerkshelfShims::create_shims(File.join(File.dirname(__FILE__), '..'))
   end
 end
 ```
