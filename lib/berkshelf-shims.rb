@@ -37,6 +37,9 @@ module BerkshelfShims
 
     def create_links(cookbook_dir, berkshelf_path)
       FileUtils.mkdir_p(cookbook_dir)
+      Dir["#{cookbook_dir}/*"].each do |f|
+        File.delete(f)
+      end
       cookbooks.each do |name, options|
         if options[:path]
           target = options[:path]
@@ -46,7 +49,7 @@ module BerkshelfShims
           target = "#{berkshelf_path}/cookbooks/#{name}-#{options[:ref]}"
         end
         if target
-          FileUtils.ln_s(target, "#{cookbook_dir}/#{name}", :force => true)
+          FileUtils.ln_s(target, "#{cookbook_dir}/#{name}")
         else
           raise UnknownCookbookReferenceError.new(name, options)
         end

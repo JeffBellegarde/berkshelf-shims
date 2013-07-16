@@ -51,8 +51,21 @@ describe BerkshelfShims do
           File.readlink("#{cookbooks_dir}/relative").should == relative_target_dir
           File.readlink("#{cookbooks_dir}/versioned").should == "#{BerkshelfShims.berkshelf_path}/cookbooks/versioned-0.0.1"
           File.readlink("#{cookbooks_dir}/somegitrepo").should == "#{BerkshelfShims.berkshelf_path}/cookbooks/somegitrepo-6ffb9cf5ddee65b8c208dec5c7b1ca9a4259b86a"
-          Dir[relative_target_dir].should == []
+          Dir["#{relative_target_dir}/*"].should == []
         end
+        context 'run a second time' do
+          before do
+            BerkshelfShims::create_shims('tmp')
+          end
+          it 'creates the links' do
+            Dir.exists?(cookbooks_dir).should == true
+            Dir["#{cookbooks_dir}/*"].sort.should == ["#{cookbooks_dir}/relative", "#{cookbooks_dir}/somegitrepo", "#{cookbooks_dir}/versioned"]
+            File.readlink("#{cookbooks_dir}/relative").should == relative_target_dir
+            File.readlink("#{cookbooks_dir}/versioned").should == "#{BerkshelfShims.berkshelf_path}/cookbooks/versioned-0.0.1"
+            File.readlink("#{cookbooks_dir}/somegitrepo").should == "#{BerkshelfShims.berkshelf_path}/cookbooks/somegitrepo-6ffb9cf5ddee65b8c208dec5c7b1ca9a4259b86a"
+            Dir["#{relative_target_dir}/*"].should == []
+          end
+      end
       end
 
       context 'with an explicit berkshelf path' do
