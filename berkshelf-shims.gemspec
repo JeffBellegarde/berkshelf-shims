@@ -17,4 +17,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
 
+  #berkshelf-shims works with berkshelf 1 and berkshelf 2 Gemfile.locks.
+  #we only use berkshelf code for reading the 2.0 file.
+  gem.add_runtime_dependency 'berkshelf', '< 3.0'
 end

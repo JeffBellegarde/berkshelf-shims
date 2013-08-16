@@ -1,3 +1,5 @@
+require 'json'
+
 describe BerkshelfShims do
   describe '#berkshelf_path' do
     subject {BerkshelfShims.berkshelf_path}
@@ -18,32 +20,34 @@ describe BerkshelfShims do
     end
   end
 
-  describe '#create_shims' do
+  shared_examples 'berkshelf examples' do
     let(:test_dir) {'tmp'}
     let(:lock_file) {"#{test_dir}/Berksfile.lock"}
     let(:cookbooks_dir) {"#{test_dir}/cookbooks"}
     let(:relative_target_dir) {File.expand_path("#{test_dir}/relative")}
-
     before do
-      FileUtils.rm_rf(test_dir)
-      FileUtils.mkdir(test_dir)
-      File.open(lock_file, 'w') do |f|
-        cookbook_entries.each do |line|
-          f.puts line
-        end
+      Dir.mkdir(relative_target_dir)
+      File.open(File.join(relative_target_dir, "metadata.rb"), 'w') do |f|
+        f.write('name "relative"')
       end
     end
+
     context 'with a normal input' do
       let(:cookbook_entries) {[
                                "cookbook 'relative', :path => '#{relative_target_dir}'",
                                "cookbook 'versioned', :locked_version => '0.0.1'",
                                "cookbook 'somegitrepo', :git => 'http://github.com/someuser/somegitrepo.git', :ref => '6ffb9cf5ddee65b8c208dec5c7b1ca9a4259b86a'"
                               ]}
+      let(:v2_cookbook_entries) {{
+          #Still converting these entries 2.0 format.
+          'relative' => {:path => "#{relative_target_dir}"},
+          'versioned' => {:locked_version => '0.0.1'},
+          'somegitrepo' => {:git => 'http://github.com/someuser/somegitrepo.git', :ref => '6ffb9cf5ddee65b8c208dec5c7b1ca9a4259b86a'}
+        }}
 
       context 'with the default berkshelf path' do
         before do
-          Dir.mkdir(relative_target_dir)
-          BerkshelfShims::create_shims('tmp')
+          BerkshelfShims::create_shims(test_dir)
         end
         it 'creates the links' do
           Dir.exists?(cookbooks_dir).should == true
@@ -51,11 +55,10 @@ describe BerkshelfShims do
           File.readlink("#{cookbooks_dir}/relative").should == relative_target_dir
           File.readlink("#{cookbooks_dir}/versioned").should == "#{BerkshelfShims.berkshelf_path}/cookbooks/versioned-0.0.1"
           File.readlink("#{cookbooks_dir}/somegitrepo").should == "#{BerkshelfShims.berkshelf_path}/cookbooks/somegitrepo-6ffb9cf5ddee65b8c208dec5c7b1ca9a4259b86a"
-          Dir["#{relative_target_dir}/*"].should == []
         end
         context 'run a second time' do
           before do
-            BerkshelfShims::create_shims('tmp')
+            BerkshelfShims::create_shims(test_dir)
           end
           it 'creates the links' do
             Dir.exists?(cookbooks_dir).should == true
@@ -63,14 +66,13 @@ describe BerkshelfShims do
             File.readlink("#{cookbooks_dir}/relative").should == relative_target_dir
             File.readlink("#{cookbooks_dir}/versioned").should == "#{BerkshelfShims.berkshelf_path}/cookbooks/versioned-0.0.1"
             File.readlink("#{cookbooks_dir}/somegitrepo").should == "#{BerkshelfShims.berkshelf_path}/cookbooks/somegitrepo-6ffb9cf5ddee65b8c208dec5c7b1ca9a4259b86a"
-            Dir["#{relative_target_dir}/*"].should == []
           end
       end
       end
 
       context 'with an explicit berkshelf path' do
         before do
-          BerkshelfShims::create_shims('tmp', 'berkshelf')
+          BerkshelfShims::create_shims(test_dir, 'berkshelf')
         end
         it 'creates the links' do
           Dir.exists?(cookbooks_dir).should == true
@@ -84,7 +86,7 @@ describe BerkshelfShims do
       context 'with an environent variable' do
         before do
           ENV[BerkshelfShims::BERKSHELF_PATH_ENV] = '/berkshelf_env'
-          BerkshelfShims::create_shims('tmp')
+          BerkshelfShims::create_shims(test_dir)
         end
         it 'creates the links' do
           Dir.exists?(cookbooks_dir).should == true
@@ -100,9 +102,36 @@ describe BerkshelfShims do
       let(:cookbook_entries) {[
                                "cookbook 'relative'"
                               ]}
+      let(:v2_cookbook_entries) {{
+          'relative' => {}
+        }}
       it 'throws an error' do
-        expect {BerkshelfShims::create_shims('tmp')}.to raise_error BerkshelfShims::UnknownCookbookReferenceError
+        expect {BerkshelfShims::create_shims(test_dir)}.to raise_error BerkshelfShims::UnknownCookbookReferenceError
       end
     end
+  end
+
+  describe 'Berkshelf 1.0 format' do
+    before do
+      FileUtils.rm_rf(test_dir)
+      FileUtils.mkdir(test_dir)
+      File.open(lock_file, 'w') do |f|
+        cookbook_entries.each do |line|
+          f.puts line
+        end
+      end
+    end
+    include_examples 'berkshelf examples'
+  end
+
+  describe 'Berkshelf 2.0 format' do
+    before do
+      FileUtils.rm_rf(test_dir)
+      FileUtils.mkdir(test_dir)
+      File.open(lock_file, 'w') do |f|
+        f.write(JSON.dump({:sources => v2_cookbook_entries}))
+      end
+    end
+    include_examples 'berkshelf examples'
   end
 end
