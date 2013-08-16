@@ -21,7 +21,7 @@ describe BerkshelfShims do
   end
 
   shared_examples 'berkshelf examples' do
-    let(:test_dir) {'tmp'}
+    let(:test_dir) {File.expand_path(File.join(File.dirname(__FILE__), '../tmp'))}
     let(:lock_file) {"#{test_dir}/Berksfile.lock"}
     let(:cookbooks_dir) {"#{test_dir}/cookbooks"}
     let(:relative_target_dir) {File.expand_path("#{test_dir}/relative")}
