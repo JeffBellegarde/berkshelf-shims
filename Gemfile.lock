@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    berkshelf-shims (0.1.2)
+    berkshelf-shims (0.2.0)
       berkshelf (< 3.0)
 
 GEM
